@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" style="background-color: gray;">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <title>Equipo</title>
+        <link rel="stylesheet" href="{% static 'cuadro_mensaje.css' %}">
+        <link rel="stylesheet" href="{% static 'home.css' %}">
+        <link rel="shortcut icon" href="{% static 'logo.png' %}">
+        <link rel="stylesheet" href="{% static 'check.css' %}">
+    </head>
+ <style>
+        header{
+            width: 100%;
+            right:0%;
+            background:#4e4d4d ;
+            position: relative;
+            top: -10px;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            border: 2px solid violet;
+            box-sizing: border-box;
+            border-radius: 10px;
+            min-height: -5px;
+            
+        }    
+
+        h3 {
+            text-align:center;
+            text-transform: uppercase;
+            font-size: 15px;
+            line-height: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;                              
+        } 
+    </style>            
+    <section class="form-home" style="height: 430px; width: 410px; margin-top: 8%;">
+        <header>
+            <h3>{{nombre_proyecto}}</h3>
+        </header>   
+        <h5>Administración de Equipo</h5>      
+        <form>
+            <input class="buttons" type="button" name="" value="Listar miembros" onclick="window.location='/lista_miembro/'"> 
+            <br><br><br>
+            <input class="buttons" type="button" name="" value="Agregar miembro" onclick="window.location='/add_miembro/'"> 
+            <br><br><br>
+            <input class="buttons" type="button" name="" value="Eliminar miembro" onclick="window.location='/delete_miembro/'">
+            <br><br><br>
+            <input class="buttons" type="button" name=""  value="Atrás" onclick="window.location='/proyects/'">
+        </form> 
+    </section>
+</html>

@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .multiselect {
+                width: 48%;
+                position: relative;
+                float: left;
+                margin: 5px;
+                padding: 10px;                
+            }
+         
+            .selectBox {
+                position: relative;
+            }
+         
+            .selectBox select {
+                width: 100%;
+            }
+         
+            .overSelect {
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 0;
+                bottom: 0;
+            }
+         
+            #checkboxes {
+                display: block;
+                border: 1px #dadada solid;
+                position:absolute;
+                width:100%;
+                color: black;
+                background-color:white;
+                box-sizing: border-box;
+                overflow-y:auto;
+                max-height:110px;
+            }
+            #checkboxes.hide {display:none;}
+         
+            #checkboxes label {
+                display: block;
+                
+            }
+         
+            #checkboxes label:hover {
+                background-color: #af0cc5;
+            }
+        </style>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <title>Registrar usuario en REJA</title>
+        <link rel="stylesheet" href="{% static 'cuadro_mensaje.css' %}">
+        <link rel="stylesheet" href="{% static 'registrar.css' %}">
+        <link rel="shortcut icon" href="{% static 'logo.png' %}">
+        <link rel="stylesheet" href="{% static 'check.css' %}">
+        <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+        <script defer src="{% static 'check.js' %}"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        
+        <script>
+            function showCheckboxes() {
+                var checkboxes = document.getElementById("checkboxes");
+                if(checkboxes.classList.contains("hide")) {
+                    checkboxes.classList.remove("hide");
+                } else {
+                    checkboxes.classList.add("hide");
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <section class="form-home" style="height: 500px;">
+            <h5>Crea un usuario</h5>
+            <h4>1) Datos del Usuario</h4>
+            <form action="/reg_user" method="GET" autocomplete="off">
+                <input class="input_txt" type="text" name="p_nombre" value="" placeholder="Primer nombre" maxlength="50" required>
+                <input class="input_txt" type="text" name="s_nombre" value="" placeholder="Segundo nombre" maxlength="50">
+                <input class="input_txt" type="text" name="p_apellido" value="" placeholder="Primer apellido" maxlength="50" required>
+                <input class="input_txt" type="text" name="s_apellido" value="" placeholder="Segundo apellido" maxlength="50">
+                <label class="input_txt" style="color:black; height: 37.5px;">Fecha de nacimiento:</label>
+                <input class="input_txt" type="date" name="fec_nacimiento" value="" max={{current_date}} required>
+                <input class="input_txt" type="text" id="user" name="username" value="" placeholder="Username" maxlength="15" required>
+                <input class="input_txt" type="email" name="correo" value="" placeholder="Correo Electrónico" maxlength="100" required>
+
+                <label class="input_txt" style="color:black; height: 37.5px;">Rol/es del usuario:</label>
+        
+                <div class="multiselect">
+                    <div class="selectBox" onclick="showCheckboxes()">
+                        <select>
+                            <option>Selecciona los roles</option>
+                        </select>
+                        <div class="overSelect"></div>
+                    </div>
+                    <div id="checkboxes" class="hide">
+                        {% for rol in lista_roles %}
+                            <label ><input type="checkbox" value={{ rol.0 }} />{{ rol.1 }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+        
+                <input class="input_txt" id="pass" name="password" type="password" value="" placeholder="Constraseña" maxlength="15" required>
+                <input class="input_txt" id="pass2" type="password" value="" name="password_rep" placeholder="Repetir constraseña" maxlength="15" required>
+                <input class="buttons" type="button" style="float: left;" onclick="window.location='/seguridad';" name="" value="CANCELAR">
+                <input class="buttons" id="btn" type="button" style="float: right;" name="" value="REGISTRAR">
+                <input class="buttons" id="bt_registrar" type="submit" style="float: right; visibility:hidden" name="" value="REGISTRAR">
+            </form>
+        </section>
+        <script>
+            $('#btn').on('click', function(e) {
+                e.preventDefault();
+                var roles_seleccionados = [];
+                $('input[type="checkbox"]').each(function() {
+                    if ($(this).is(':checked')) {
+                        roles_seleccionados.push($(this).val());
+                    }
+                });
+
+                var password = document.getElementById('pass').value;
+                var password2 = document.getElementById('pass2').value;
+                var username = document.getElementById('user').value;
+
+                $.ajax({
+                    type: 'GET',
+                    url: "/validar_datos_signup",
+                    traditional: true,
+                    data: { 
+                        'password' : password,
+                        'password2' : password2,
+                        'username' : username
+                    },
+                    success:function(data) {
+                        if (roles_seleccionados.length == 0){
+                            swal("No se selecciono ningun rol");
+                        }else{
+                            $.ajax({
+                                type: 'GET',
+                                url: "/guardar_roles_selected",
+                                traditional: true,
+                                data: { 'rol_select' : roles_seleccionados},
+                                success:function(data) {
+                                    $("#bt_registrar").click();
+                                },
+                                error: function(xhr, status, error) {
+                                    window.location.reload();
+                                }
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        swal(
+                            xhr.responseJSON['mensaje']
+                        );
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

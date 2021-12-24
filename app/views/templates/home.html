@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <title>REJA. Bienvenid@!!!</title>
+        <link rel="stylesheet" href="{% static 'home.css' %}">
+        <link rel="shortcut icon" href="{% static 'logo.png' %}">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
+    </head>
+    <body>
+        <section class="form-home">
+            <div class="popover__wrapper">
+                <a href="/login"><i class="fas fa-window-close close" style="font-family:arial, FontAwesome"></i></a>
+                <div class="popover__content">
+                    <span class="popover__message">Cerrar Sesión</span>
+                </div>
+            </div>
+            <b class="far fa-user-circle icon" style="font-family:arial, FontAwesome"></b>
+            <h5>BIENVENID@ {{user.upper}}</h5>
+            <form action>
+                <input class="buttons" id="1" type="button" name="" value="Seguridad" disabled style="background:gray" onclick="window.location='/seguridad/'"> 
+                <br><br><br>
+                <input class="buttons" id="2" type="button" name="" disabled style="background:gray" value="Proyecto" onclick="window.location='/proyects/'">
+                <br><br><br>
+                <input class="buttons" id="3" type="button" name="" disabled style="background:gray" value="Desarrollo" onclick="window.location='/desarrollo'">
+            </form> 
+        </section>
+        <script>
+            var permisos = {{permisos | safe}};
+            permisos.forEach(function(permiso) {
+                var per = permiso.toUpperCase();
+                if (per === "SEGURIDAD") {
+                    document.getElementById("1").disabled=false;
+                    document.getElementById("1").style="background:white";
+                }
+                if (per === "PROYECTO") {
+                    document.getElementById("2").disabled=false;
+                    document.getElementById("2").style="background:white";
+                }
+                if (per === "DESARROLLO") {
+                    document.getElementById("3").disabled=false;
+                    document.getElementById("3").style="background:white";
+                }
+            });
+        </script>
+    </body>
+</html>

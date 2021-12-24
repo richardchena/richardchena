@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+    <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+            <title>Modificar Permiso</title>
+            <link rel="stylesheet" href="{% static 'registrar.css' %}">
+            <link rel="shortcut icon" href="{% static 'logo.png' %}">
+            <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+            <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+            <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        </head>
+        <body>
+            <section class="form-home" style="height: 400px;">
+                <h5>Modificar Permisos</h5>
+                <form id="buscar_permiso" methon="GET" autocomplete="off">
+                    <select id="lista_permisos" class="input_txt" style="height: 42px;">
+                        <option value="" selected="selected">Elige una opción</option>
+                        {% for permiso in lista_permisos %}
+                            <option value={{ permiso.0 }}>{{ permiso.1 }}</option> 
+                        {% endfor %}
+                    </select>
+                    <input class="buttons" type="submit" name="" value="SELECCIONAR">
+                </form>
+                <br>
+                <h4>Datos actuales</h4>
+                <form id="form_modificar" action="/mod_permiso" methon="GET" autocomplete="off">
+                    <input class="input_txt" id="name" name="nombre" style="width: 100%;" type="text" value="" placeholder="Nombre" maxlength="30" onkeyup="es_vacio()" disabled>
+                    <input class="input_txt" id="desc" name="descripcion" style="width: 100%;" type="text" value="" placeholder="Agrega una descripción" maxlength="50" disabled>
+                    <br><br><br><br>
+                    <input class="buttons" type="button" style="float: left; margin-top: 14%;" onclick="window.location='/seguridad';" name="" value="CANCELAR">
+                    <input class="buttons" id="reg" type="submit" style="float: right; margin-top: 14%;" name="" value="MODIFICAR" disabled>
+                    <input class="input_txt" type="hidden" name="id_permiso" id="permiso">
+                </form>
+            </section>
+
+            <script>
+                function es_vacio(){
+                    var campo1 = document.getElementById("name").value;
+                    if(campo1 != ""){
+                        document.getElementById("reg").removeAttribute('disabled');
+                    }
+                    else{
+                        document.getElementById("reg").setAttribute('disabled', 'disabled');
+                    }
+                }
+
+                $("#reg").on('click', function(e){
+                    e.preventDefault();
+                    var formulario = $(this).parents('form');
+                    swal(
+                        "¿Desea guardar el proyecto?", 
+                        {
+                            buttons: true
+                        }
+                    ).then(okay => { 
+                        if (okay) {
+                            swal({title:"Modificado!",text:" ", icon:"success", button:false}), function () {
+                                location.reload();
+                            };
+                            formulario.submit();
+                        }else{
+                            return false;
+                        }
+                    });
+                });
+
+                $(document).on("change","select",function(){
+                    $("option[value=" + this.value + "]", this)
+                    .attr("selected", true).siblings()
+                    .removeAttr("selected")
+                });
+
+                $(document).ready(function(){
+                    $("#buscar_permiso").submit(function(e){
+                        e.preventDefault();
+                        var permiso_value = document.getElementById("lista_permisos")
+                        $.ajax({
+                            type: 'GET',
+                            url: "/obt_permiso/",
+                            data: { "id_permiso": permiso_value.options[permiso_value.selectedIndex].value },
+                            success:function(data) {
+                                document.getElementById("name").disabled = false;
+                                document.getElementById("name").value = data.nombre;
+                                document.getElementById("desc").disabled = false;
+                                document.getElementById("desc").value = data.descripcion;
+                                document.getElementById("reg").disabled = false;
+                                document.getElementById("permiso").value = data.id_permiso;
+                            },
+                            error: function() {
+                            }
+                        });
+                    });
+                });
+
+                $(document).ready(function(){
+                    $("#lista_permisos").on('change', function(){
+                        form_modificar.reset();
+                        document.getElementById("reg").disabled="true";
+                    });
+                });  
+
+            </script>
+        </body>
+    </html>

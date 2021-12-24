@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <title>Iniciar Sprint</title>
+        <link rel="shortcut icon" href="{% static 'logo.png' %}">
+        <link rel="stylesheet" href="{% static 'registrar.css' %}">
+        <script defer src="{% static 'iniciar_sprint.js' %}"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> 
+        <style>
+            .input_txt2 {
+                width: 100%;
+                border: 1px solid black;
+                margin: 5px;
+                padding: 11px;
+                background: #a8a4a4;
+                font-size: 13px;
+                float: left;
+            }
+        </style> 
+    </head>
+    <body>        
+        <section class="form-home" style="height: 530px;">
+            <form action="/ini_sprint" method="GET" autocomplete="off">
+                <h5>INICIAR SPRINT</h5>
+                <h4>Datos del Sprint</h4>
+                <b style="color:grey"><p>Nombre Proyecto: {{proy}}</p></b>
+                Nombre Sprint:<br>
+                <input class="input_txt2" name="nombre" value='{{nombre.upper}}' placeholder={{nombre.upper}}><br>
+                <select id="duracion" class="input_txt2" onchange="habilitar(this.options[this.selectedIndex].value)">
+                    <option selected disabled> Elegir duracion del sprint</option>                     
+                    <option value = 0 >Personalizado</option>                     
+                    <option value = 1 >1 semana</option> 
+                    <option value = 2 >2 semanas</option> 
+                    <option value = 3 >3 semanas</option> 
+                    <option value = 4 >4 semanas</option> 
+                </select>
+            
+                <form class = "fechas" id="reset_form">  
+                    <br><br><br><p>Fecha Inicio</p>
+                    <input class="input_txt2" id="fecha1" type="date" name="fecha_inicio" min={{current_date}} value= "" maxlength="30" disabled required >
+                    <br>
+                    <p>Fecha Fin</p>
+                    <input class="input_txt2" id="fecha2" type="date" name="fecha_fin" min={{current_date}} value="" maxlength="30" disabled required>
+                </form>
+                <input class="buttons" type="button" style="float: left;" onclick="window.location='/sprint';" name="" value="CANCELAR">
+                <input class="buttons" id="bt_guardar" type="submit"  name="" value="GUARDAR">
+            </form>
+        </section> 
+        
+        <script>
+            var duracion = null;
+            $(document).on("change","select",function(){
+                var duraciones = document.getElementById("duracion");
+                duracion = duraciones.options[duraciones.selectedIndex].value;
+            });
+
+            $("#bt_guardar").on('click', function(e){
+                e.preventDefault();
+                var id = document.getElementsByName("nombre")[0].id;
+                var nombre = document.getElementsByName("nombre")[0].value;
+                var fecha_inicio = document.getElementById("fecha1").value;
+                var fecha_fin = document.getElementById("fecha2").value;
+
+                var fecha_actual = new Date();
+                var fecha_actual_str = String(fecha_actual.getFullYear()) + "-" + String(fecha_actual.getMonth()+1) + "-" + String(fecha_actual.getDate());
+
+
+                if (fecha_inicio === "" || fecha_fin === ""){
+                    swal("No se selecciono ninguna FECHA");
+                }else if (fecha_fin < fecha_inicio){
+                    swal("La FECHA FIN no puede ser menor que la FECHA INICIO");
+                }else if (fecha_inicio < fecha_actual_str){
+                    swal("La FECHA INICIO no puede ser menor que la FECHA ACTUAL");
+                }else{
+                    $.ajax({
+                        type: 'GET',
+                        url: "/ini_sprint",
+                        data: { 
+                            'nombre' : nombre,
+                            'fecha_inicio' : fecha_inicio,
+                            'fecha_fin' : fecha_fin
+                        },
+                        success:function(data) {
+                            window.location.href = "/sprint";
+                        },
+                        error: function(xhr, status, error) {
+                            swal(xhr.responseJSON["mensaje"]);
+                        }
+                    });
+                }
+            });   
+            
+
+            $("#fecha1").on("change", function(){
+                var fecha1 = document.getElementById("fecha1").value;
+                var duracion_dias = duracion * 7;
+                $.ajax({
+                    type: 'GET',
+                    url: "/calcular_fecha",
+                    data: { 
+                        'fecha_inicio' : fecha1,
+                        'duracion': duracion_dias
+                    },
+                    success:function(data) {
+                        document.getElementById("fecha2").value = data.fecha_fin_sprint;
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+            });
+        
+        </script>
+    </body>
+
+</html>
+

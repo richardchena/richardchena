@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .multiselect {
+                width: 48%;
+                position: relative;
+                float: left;
+                margin: 5px;
+                padding: 10px;                
+            }
+         
+            .selectBox {
+                position: relative;
+            }
+         
+            .selectBox select {
+                width: 100%;
+            }
+         
+            .overSelect {
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 0;
+                bottom: 0;
+            }
+         
+            #checkboxes {
+                display: block;
+                border: 1px #dadada solid;
+                position:absolute;
+                width:100%;
+                color: black;
+                background-color:white;
+                box-sizing: border-box;
+                overflow-y:auto;
+                max-height:110px;
+            }
+            #checkboxes.hide {display:none;}
+         
+            #checkboxes label {
+                display: block;
+                
+            }
+         
+            #checkboxes label:hover {
+                background-color: #af0cc5;
+            }
+        </style>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <title>Modificar usuario</title>
+        <link rel="stylesheet" href="{% static 'registrar.css' %}">
+        <link rel="stylesheet" href="{% static 'cuadro_mensaje.css' %}">
+        <link rel="shortcut icon" href="{% static 'logo.png' %}">
+        <link rel="stylesheet" href="{% static 'check.css' %}">
+        <script defer src="{% static 'modificar_us.js' %}"></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+        <script defer src="{% static 'check.js' %}"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        <script>
+            function showCheckboxes() {
+                var checkboxes = document.getElementById("checkboxes");
+                if(checkboxes.classList.contains("hide")) {
+                    checkboxes.classList.remove("hide");
+                } else {
+                    checkboxes.classList.add("hide");
+                }
+            }
+        </script>
+    </head>
+    <section class="form-home" style="height: 500px;">
+        <h5>Modificar usuario</h5>
+        <form id="buscar_usuario" method="GET" autocomplete="off">
+            <input class="input_txt" type="text" name="username" id="user" value="" placeholder="Escriba aquí el username" maxlength="15" required>
+            <input class="buttons" type="submit" name="" value="BUSCAR">
+        </form>
+        <h4>1) Datos Personales</h4>
+        <form id="formulario" method="GET" action="/mod_user" autocomplete="off">
+            <input class="input_txt" type="text" id="1st_name" name="p_nombre" placeholder="Primer nombre" maxlength="50" disabled required>
+            <input class="input_txt" type="text" id="2nd_name" name="s_nombre" placeholder="Segundo nombre" maxlength="50" disabled>
+            <input class="input_txt" type="text" id="1er_ape" name="p_apellido" placeholder="Primer apellido" maxlength="50" disabled required>
+            <input class="input_txt" type="text" id="2do_ape" name="s_apellido" placeholder="Segundo apellido" maxlength="50" disabled>
+            <label class="input_txt" style="color:black; height: 37.5px;">Fecha de nacimiento:</label>
+            <input class="input_txt" type="date" name="fec_nacimiento" id="fec" disabled required>
+
+            <input class="input_txt" type="email" id="email" name="correo" placeholder="Correo Electrónico" maxlength="100" disabled required>
+            <input class="input_txt" type="password" id="pass" name="password" placeholder="Nueva constraseña" maxlength="15" disabled required>
+
+            <label class="input_txt" style="color:black; height: 37.5px;">Rol/es del usuario:</label>
+            
+            <div class="multiselect">
+                <div class="selectBox" onclick="showCheckboxes()">
+                    <select>
+                        <option>Selecciona los roles</option>
+                    </select>
+                    <div class="overSelect"></div>
+                </div>
+                <div id="checkboxes" class="hide">
+                    {% for rol in lista_roles %}
+                        <label ><input id="check" type="checkbox"  value={{ rol.0 }} />{{ rol.1 }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <input class="buttons"  type="button" onclick="window.location='/seguridad';" name="" value="CANCELAR">
+            <input class="buttons" id="bt_modificar" style="float: right;" type="button" name="" value="MODIFICAR" disabled="true">
+            <input class="buttons" id="bt_mod" type="submit" style="float: right; visibility:hidden" name="" value="REGISTRAR">
+            <input class="input_txt" type="hidden" name="username2" id="user2">
+        </form>
+        
+    </section>
+    <body>
+        <script>
+            $("#bt_mod").on('click', function(e){
+                e.preventDefault();
+                var formulario = $(this).parents('form');
+                swal(
+                    "¿Desea modificar el usuario?", 
+                    {
+                        buttons: true
+                    }
+                ).then(okay => { 
+                    if (okay) {
+                        swal({title:"Modificado!",text:" ", icon:"success", button:false}), function () {
+                            location.reload();
+                        };
+                        formulario.submit();
+                    }else{
+                        return false;
+                    }
+                });
+            });
+
+            $(document).ready(function(){
+                $("#buscar_usuario").submit(function(e){
+                    e.preventDefault();
+                    $.ajax({
+                        type: 'GET',
+                        url: "/obtener_usuario/",
+                        data: $(this).serialize(),
+                        success:function(data) {
+                            document.getElementById("1st_name").disabled = false;
+                            document.getElementById("1st_name").value = data.p_nombre
+                            document.getElementById("2nd_name").disabled = false;
+                            document.getElementById("2nd_name").value = data.s_nombre;
+                            document.getElementById("1er_ape").disabled = false;
+                            document.getElementById("1er_ape").value = data.p_apellido;
+                            document.getElementById("2do_ape").disabled = false;
+                            document.getElementById("2do_ape").value = data.s_apellido;
+                            document.getElementById("fec").disabled = false;
+                            document.getElementById("fec").value = data.nacimiento;
+                            document.getElementById("email").disabled = false;
+                            document.getElementById("email").value = data.correo;
+                            document.getElementById("pass").disabled = false;
+                            document.getElementById("pass").value = data.pass;
+                            document.getElementById("user2").value = data.username;
+                            document.getElementById("bt_modificar").disabled= false;
+                            roles = document.querySelectorAll('#check');
+                            for (let j = 0; j < roles.length; j++) {
+                                $(roles).eq(j).prop("checked", false); 
+                            }
+
+                            for (let j = 0; j < roles.length; j++) {
+                                for (let i = 0; i < (data.permisos).length; i++) {
+                                    if (roles[j].value == (data.permisos)[i]) {
+                                        $(roles).eq(j).prop("checked", true);
+                                    }   
+                                }    
+                            }
+
+                            document.querySelectorAll('option[value="1"]')[0].attributes[0].value = "true";
+                            console.log(document.querySelectorAll('option[value="1"]')[0].attributes[0]);
+                        },
+                        error: function() {  
+                            swal({title:"Error",text:"No existe el usuario ingresado",icon:"error",timer:3010,
+                            buttons: false});
+                            buscar_usuario.reset();
+                            bt_registrar.disabled();
+                        }
+                    });
+                });
+            });
+
+            $(document).ready(function(){
+                $("input[id=user]").keyup(function(){
+                    formulario.reset();
+                    document.getElementById("bt_modificar").disabled=true;
+                });
+            });
+
+            $('#bt_modificar').on('click', function(e) {
+                e.preventDefault();
+                var roles_seleccionados = [];
+                $('input[type="checkbox"]').each(function() {
+                    if ($(this).is(':checked')) {
+                        roles_seleccionados.push($(this).val());
+                    }
+                    
+                });
+                
+                if (roles_seleccionados.length == 0){
+                    swal("No se selecciono ningun rol");
+                }else{
+                    $.ajax({
+                        type: 'GET',
+                        url: "/guardar_roles_selected",
+                        traditional: true,
+                        data: { 'rol_select' : roles_seleccionados},
+                        success:function(data) {
+                            $("#bt_mod").click();
+                        },
+                        error: function(xhr, status, error) {
+                            window.location.reload();
+                        }
+                    });
+                }
+            });
+        </script>
+    </body>
+</html>

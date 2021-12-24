@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+    <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+            <title>Eliminar Permiso</title>
+            <link rel="stylesheet" href="{% static 'registrar.css' %}">
+            <link rel="shortcut icon" href="{% static 'logo.png' %}">
+            <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+            <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        </head>
+        <body>        
+            <section class="form-home" style="height: 400px;">
+                <h5>Eliminar permiso</h5>
+                <form id="buscar_permiso" methon="GET" autocomplete="off">
+                    <select id="lista_permisos" class="input_txt" style="height: 40px;" id="sel">
+                        <option value="0">Elige una opción</option>
+                        {% for permiso in lista_permisos %}
+                            <option value={{ permiso.0 }}>{{ permiso.1 }}</option> 
+                        {% endfor %}   
+                    </select>
+                    <input class="buttons" type="submit" name="" value="SELECCIONAR">
+                </form>
+                <form id="form_delete_permiso" action="/del_permiso" methon="GET" autocomplete="off">
+                    <h4 style="display: none; text-align: center;" id="label1">Datos permiso</h4>
+                    <label class="input_txt" id="txt_nombre" style="display: none; color:black; background-color: white; height: 37.5px;">Nombre</label>
+                    <label class="input_txt" id="value_nombre" style="display: none; color:black; height: 37.5px;"></label>
+                    <label class="input_txt" id="txt_desc" style="display: none; color:black; background-color: white; height: 37.5px;">Descripción</label>
+                    <label class="input_txt" id="value_desc" style="display: none; color:black; height: 37.5px;"></label>
+                    <input class="buttons" id="e" type="button" onclick="window.location='/seguridad';" name="" value="CANCELAR">
+                    <input class="buttons" id="f" style="display: none;" type="submit" name="" value="ELIMINAR">
+                    <input class="input_txt" type="hidden" name="id_permiso" id="permiso">
+                </form>
+            </section>
+            <script>
+                $("#f").on('click', function(e){
+                    e.preventDefault();
+                    var formulario = $(this).parents('form');
+                    swal(
+                    {
+                        title: "Eliminar permiso",
+                        text: "¿Desea realmente eliminar el permiso?",
+                        icon :'warning',                                                       
+                        dangerMode: true,
+                        buttons: true
+                    }
+                    ).then(okay => { 
+                        if (okay) {
+                            formulario.submit();
+                        }else{
+                            return false;
+                        }
+                    });
+                });
+
+                $(document).on("change","select",function(){
+                    $("option[value=" + this.value + "]", this)
+                    .attr("selected", true).siblings()
+                    .removeAttr("selected")
+                });
+    
+                $(document).ready(function(){
+                    $("#buscar_permiso").submit(function(e){
+                        e.preventDefault();
+                        var permiso_value = document.getElementById("lista_permisos")
+                        $.ajax({
+                            type: 'GET',
+                            url: "/obt_permiso/",
+                            data: { "id_permiso": permiso_value.options[permiso_value.selectedIndex].value },
+                            success:function(data) {
+                                document.getElementById("label1").style.display="block";
+                                document.getElementById("txt_nombre").style.display="block";
+                                document.getElementById("value_nombre").style.display="block";
+                                document.getElementById("txt_desc").style.display="block";
+                                document.getElementById("value_desc").style.display="block";
+                                document.getElementById("e").style.display="block";
+                                document.getElementById("e").style.float="left";
+                                document.getElementById("e").style.marginTop="18%";
+                                document.getElementById("f").style.display="block";
+                                document.getElementById("f").style.float="left";
+                                document.getElementById("f").style.marginTop="18%";
+
+                                document.getElementById("value_nombre").disabled = false;
+                                document.getElementById("value_nombre").innerHTML = data.nombre;
+                                document.getElementById("value_nombre").disabled = true;
+                                document.getElementById("value_desc").disabled = false;
+                                document.getElementById("value_desc").innerHTML = data.descripcion;
+                                document.getElementById("value_desc").disabled = true;
+                                document.getElementById("permiso").value = data.id_permiso;
+                            },
+                            error: function() {
+                            }
+                        });
+                    });
+                });
+
+                $(document).ready(function(){
+                    $("#lista_permisos").on('change', function(){
+                        document.getElementById("label1").style.display="none";
+                        document.getElementById("txt_nombre").style.display="none";
+                        document.getElementById("value_nombre").style.display="none";
+                        document.getElementById("txt_desc").style.display="none";
+                        document.getElementById("value_desc").style.display="none";
+                        document.getElementById("f").style.display="none";
+                        document.getElementById("e").style.float="left";
+                        document.getElementById("e").style.marginTop="2%";                        
+                    });
+                });             
+            </script>
+        </body>
+    </html>
